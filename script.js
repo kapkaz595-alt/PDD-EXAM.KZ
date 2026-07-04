@@ -12,12 +12,12 @@ window.onload = async () => {
         const response = await fetch('questions.json');
         allQuestions = await response.json();
     } catch (e) {
-        alert("题库加载失败，请检查 questions.json 文件格式！");
+        alert("Сұрақтарды жүктеу қатесі! questions.json файлын тексеріңіз.");
     }
 };
 
 function startPractice() {
-    if(allQuestions.length === 0) { alert("题库还在加载中或为空，请稍候..."); return; }
+    if(allQuestions.length === 0) return;
     isExamMode = false;
     clearInterval(examTimer);
     document.getElementById('timer').classList.add('hidden');
@@ -31,7 +31,7 @@ function startPractice() {
 }
 
 function startExam() {
-    if(allQuestions.length === 0) { alert("题库还在加载中或为空，请稍候..."); return; }
+    if(allQuestions.length === 0) return;
     isExamMode = true;
     score = 0;
     currentQuestionsList = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 40);
@@ -58,9 +58,9 @@ function showQuestion() {
     const currentQuestion = currentQuestionsList[currentIndex];
     
     if (isExamMode) {
-        document.getElementById('progress').innerText = `题目: ${currentIndex + 1} / 40`;
+        document.getElementById('progress').innerText = `Сұрақ: ${currentIndex + 1} / 40`;
     } else {
-        document.getElementById('progress').innerText = `已刷: ${currentIndex + 1} 题 | 答对: ${score}`;
+        document.getElementById('progress').innerText = `Өтілген сұрақтар: ${currentIndex + 1} | Дұрыс: ${score}`;
     }
 
     document.getElementById('question-text').innerText = currentQuestion.question;
@@ -88,17 +88,17 @@ function checkAnswer(selectedIndex, clickedBtn) {
     buttons[correctIndex].classList.add('correct');
 
     if (selectedIndex === correctIndex) {
-        document.getElementById('feedback').innerHTML = "<span style='color:#10b981;'>🟢 Правильно! (正确)</span>";
+        document.getElementById('feedback').innerHTML = "<span style='color:#10b981;'>🟢 Дұрыс!</span>";
         score++;
     } else {
         clickedBtn.classList.add('incorrect');
-        document.getElementById('feedback').innerHTML = "<span style='color:#ef4444;'>🔴 Неправильно! (错误)</span>";
+        document.getElementById('feedback').innerHTML = "<span style='color:#ef4444;'>🔴 Бұрыс!</span>";
     }
 }
 
 function nextQuestion() {
     if (!hasAnswered) {
-        alert("请先选择一个答案！/ Выберите ответ!");
+        alert("Жауапты таңдаңыз!");
         return;
     }
     currentIndex++;
@@ -111,11 +111,11 @@ function startTimer() {
         timeLeft--;
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
-        document.getElementById('timer').innerText = `剩余时间: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        document.getElementById('timer').innerText = `Қалған уақыт: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         
         if (timeLeft <= 0) {
             clearInterval(examTimer);
-            alert("Время вышло! 考试时间到！");
+            alert("Уақыт аяқталды! Ем提хан аяқталды.");
             endQuiz();
         }
     }, 1000);
@@ -127,9 +127,10 @@ function endQuiz() {
     document.getElementById('mode-selection').classList.remove('hidden');
     
     if (isExamMode) {
-        const passed = score >= 32 ? "🎉 Поздравляем! Вы сдали! (恭喜你通过考试！)" : "❌ Вы не сдали. (未通过，继续努力)";
-        alert(`考试结束！\n你的得分: ${score} / 40\n${passed}`);
+        // 哈萨克斯坦考驾照40题中答对32题及以上为通过
+        const resultText = score >= 32 ? "🎉 Құттықтаймыз! Сіз емтиханнан өттіңіз!" : "❌ Сіз емтиханнан өтпедіңіз. Қайтадан байқап көріңіз.";
+        alert(`Емтихан аяқталды!\nСіздің нәтижеңіз: ${score} / 40\n\n${resultText}`);
     } else {
-        alert(`练习结束！共答对 ${score} 题。`);
+        alert(`Марафон аяқталды! Жалпы дұрыс жауаптар саны: ${score}`);
     }
 }
