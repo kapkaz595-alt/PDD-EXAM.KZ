@@ -23,13 +23,24 @@
         .nav-btn { background: #475569; }
         .nav-btn:hover { background: #334155; }
         
+        /* 媒体展示区 */
+        .media-container { width: 100%; text-align: center; margin: 15px 0; display: none; }
+        .media-container img, .media-container video { max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        /* 📘 Түсініктеме - 完美还原截图的高级解析样式 */
+        .explanation-box { background: #f8fafc; border-left: 4px solid #2563eb; padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; display: none; animation: fadeIn 0.3s ease; }
+        .explanation-title { font-weight: bold; color: #1e3a8a; margin-bottom: 5px; font-size: 11.5pt; display: flex; align-items: center; gap: 6px; }
+        .explanation-text { font-size: 11pt; color: #475569; line-height: 1.5; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
         /* Прогресс-бар */
         .progress-container { width: 100%; background-color: #e2e8f0; border-radius: 4px; height: 8px; margin-bottom: 15px; overflow: hidden; }
         .progress-bar { height: 100%; background-color: #10b981; width: 0%; transition: width 0.3s; }
         .stats-text { text-align: center; font-size: 10.5pt; color: #475569; margin-top: 5px; margin-bottom: 15px; font-weight: 500; }
         .reset-link { text-align: center; display: block; margin-top: 20px; color: #94a3b8; font-size: 10pt; text-decoration: none; cursor: pointer; }
         
-        /* Есептегіштің сәнді стилі */
+        /* 访问量计数器 */
         .counter-box { text-align: center; margin-top: 40px; margin-bottom: 10px; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .counter-title { font-size: 10pt; color: #64748b; margin-bottom: 8px; font-weight: 500; }
     </style>
@@ -63,7 +74,16 @@
 
         <div class="card">
             <p id="question-text">Жүктелуде...</p>
+            
+            <div id="media-block" class="media-container"></div>
+            
             <div id="options-container"></div>
+            
+            <div id="explanation-block" class="explanation-box">
+                <div class="explanation-title">🔵 Түсініктеме</div>
+                <div id="explanation-content" class="explanation-text"></div>
+            </div>
+            
             <div id="feedback"></div>
             <button id="next-btn" class="menu-btn nav-btn" onclick="nextQuestion()">Келесі ➡️</button>
         </div>
