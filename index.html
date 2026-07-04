@@ -23,11 +23,15 @@
         .nav-btn { background: #475569; }
         .nav-btn:hover { background: #334155; }
         
+        /* 💡 顶部“Шығу”退出按钮样式 */
+        .exit-link { background: none; border: none; color: #475569; font-size: 11.5pt; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 5px; transition: color 0.2s; text-decoration: none; }
+        .exit-link:hover { color: #1e3a8a; }
+        
         /* 媒体展示区 */
         .media-container { width: 100%; text-align: center; margin: 15px 0; display: none; }
         .media-container img, .media-container video { max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
-        /* 📘 Түсініктеме - 完美还原截图的高级解析样式 */
+        /* 📘 Түсініктеме 解析蓝框样式 */
         .explanation-box { background: #f8fafc; border-left: 4px solid #2563eb; padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; display: none; animation: fadeIn 0.3s ease; }
         .explanation-title { font-weight: bold; color: #1e3a8a; margin-bottom: 5px; font-size: 11.5pt; display: flex; align-items: center; gap: 6px; }
         .explanation-text { font-size: 11pt; color: #475569; line-height: 1.5; }
@@ -64,6 +68,13 @@
     </div>
 
     <div id="quiz-area" class="hidden">
+        
+        <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 12px;">
+            <button class="exit-link" onclick="backToHome()">
+                ⬅ Шығу
+            </button>
+        </div>
+
         <div class="progress-container">
             <div id="p-bar" class="progress-bar"></div>
         </div>
