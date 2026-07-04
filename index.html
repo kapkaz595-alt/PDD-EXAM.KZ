@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDD Онлайн Тесті 2026</title>
+    <title>ЖҚЕ Жаттықтырушы 2026</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 15px; background: #f0f4f8; color: #333; }
@@ -22,20 +22,33 @@
         #timer { color: #dc2626; }
         .nav-btn { background: #475569; }
         .nav-btn:hover { background: #334155; }
+        
+        /* 进度条样式 */
+        .progress-container { width: 100%; background-color: #e2e8f0; border-radius: 4px; height: 8px; margin-bottom: 15px; overflow: hidden; }
+        .progress-bar { height: 100%; background-color: #10b981; width: 0%; transition: width 0.3s; }
+        .stats-text { text-align: center; font-size: 10.5pt; color: #475569; margin-top: 5px; margin-bottom: 15px; font-weight: 500; }
+        .reset-link { text-align: center; display: block; margin-top: 20px; color: #94a3b8; font-size: 10pt; text-decoration: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <h1>🚗 ЖҚЕ Онлайн Тесті</h1>
+    <h1>🚗 ЖҚЕ Жаттықтырушы</h1>
     
     <div id="mode-selection">
-        <button class="menu-btn" onclick="startPractice()">🔄 Марафон (Барлық сұрақтар)</button>
+        <button class="menu-btn" onclick="startPractice()">🔄 Жаттығу (Есте сақтау режимі)</button>
+        <div id="practice-stats" class="stats-text">Жүктелуде...</div>
+        
         <button class="menu-btn" onclick="startExam()">⏱ Емтихан (40 сұрақ)</button>
+        
+        <a id="reset-btn" class="reset-link hidden" onclick="resetProgress()">🔄 Прогресті нөлдеу (Шешімдерді тазалау)</a>
     </div>
 
     <div id="quiz-area" class="hidden">
+        <div class="progress-container">
+            <div id="p-bar" class="progress-bar"></div>
+        </div>
         <div id="info-bar">
-            <span id="progress">Сұрақ: 1 / 40</span>
+            <span id="progress">Сұрақ: 1</span>
             <span id="timer" class="hidden">Қалған уақыт: 40:00</span>
         </div>
 
