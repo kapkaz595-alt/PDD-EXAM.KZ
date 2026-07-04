@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="kk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ПДД 驾考宝典 2026</title>
+    <title>PDD Онлайн Тесті 2026</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 15px; background: #f0f4f8; color: #333; }
-        h1 { text-align: center; color: #1e3a8a; font-size: 20pt; margin-bottom: 20px; }
+        h1 { text-align: center; color: #1e3a8a; font-size: 20pt; margin-bottom: 25px; }
         .menu-btn { display: block; width: 100%; padding: 15px; font-size: 13pt; font-weight: bold; cursor: pointer; margin-bottom: 12px; border: none; border-radius: 8px; background: #2563eb; color: white; transition: background 0.2s; }
         .menu-btn:hover { background: #1d4ed8; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 15px; }
@@ -26,24 +26,24 @@
 </head>
 <body>
 
-    <h1>🚗 ПДД 驾考宝典 (Казахстан)</h1>
+    <h1>🚗 ЖҚЕ Онлайн Тесті</h1>
     
     <div id="mode-selection">
-        <button class="menu-btn" onclick="startPractice()">🔄 随机顺序刷题 (1500+题)</button>
-        <button class="menu-btn" onclick="startExam()">⏱ 模拟考试 (随机40题)</button>
+        <button class="menu-btn" onclick="startPractice()">🔄 Марафон (Барлық сұрақтар)</button>
+        <button class="menu-btn" onclick="startExam()">⏱ Емтихан (40 сұрақ)</button>
     </div>
 
     <div id="quiz-area" class="hidden">
         <div id="info-bar">
-            <span id="progress">题目: 1 / 40</span>
-            <span id="timer" class="hidden">剩余时间: 40:00</span>
+            <span id="progress">Сұрақ: 1 / 40</span>
+            <span id="timer" class="hidden">Қалған уақыт: 40:00</span>
         </div>
 
         <div class="card">
-            <p id="question-text">加载中...</p>
+            <p id="question-text">Жүктелуде...</p>
             <div id="options-container"></div>
             <div id="feedback"></div>
-            <button id="next-btn" class="menu-btn nav-btn" onclick="nextQuestion()">下一题 ➡️</button>
+            <button id="next-btn" class="menu-btn nav-btn" onclick="nextQuestion()">Келесі ➡️</button>
         </div>
     </div>
 
