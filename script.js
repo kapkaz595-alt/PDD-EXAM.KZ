@@ -8,7 +8,7 @@ let score = 0;
 let hasAnswered = false;
 
 // 🔒 核心安全与付费配置（当前设置为全免费运行）
-const SECURITY_KEY = "000000"; // 你的解锁密码（后期收费时用）
+const SECURITY_KEY = "avto2026"; // 你的解锁密码（后期收费时用）
 const FREE_LIMIT = 999999;       // 免费题数限制（设为999999相当于当前全免费）
 
 window.onload = async () => {
@@ -201,7 +201,7 @@ function lockScreenForPayment() {
         <div style="text-align: center; padding: 15px; background: #fff; border-radius: 8px;">
             <p style="font-size: 12pt; font-weight: bold; color: #dc2626; margin-bottom: 10px;">
                 Пароль таратпаймыз ‼️ <br>
-                <span style="font-size: 10.5pt; font-weight: normal; color: #475569;">За распространение пароля другим будет блокировка!</span>
+                <span style="font-size: 10.5pt; font-weight: normal; color: #475569;">За распространение密码将导致封号!</span>
             </p>
             <p style="font-size: 10pt; color: #64748b; margin-bottom: 15px; line-height: 1.4;">
                 Тегін сұрақтар шегіне жеттіңіз. Барлық 1500+ сұрақты ашу және құпия сөзді сатып алу үшін жазыңыз: <br>
@@ -218,9 +218,22 @@ function verifyUserPassword() {
     const input = document.getElementById('pass-input').value.trim();
     if (input === SECURITY_KEY) {
         localStorage.setItem('pdd_user_unlocked', 'true');
-        alert("🎉 Сәтті ашылды! (Доступ open!)");
+        alert("🎉 Сәтті ашылды! (Доступ открыт!)");
         showQuestion();
     } else {
         alert("❌ Қате пароль! (Неверный пароль!)");
     }
+}
+
+// 🔙 完美关联顶部的 “Шығу” 退出回到首页功能
+function backToHome() {
+    if (isExamMode) {
+        if (!confirm("Емтиханды тоқтатып, шыққыңыз келеді ме?")) {
+            return; 
+        }
+    }
+    clearInterval(examTimer);
+    document.getElementById('quiz-area').classList.add('hidden');
+    document.getElementById('mode-selection').classList.remove('hidden');
+    updateMenuStats();
 }
