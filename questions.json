@@ -1,5 +1,4 @@
-// questions.js 文件内容
-const questions = [
+ [
   {
     "question": "«Жеткіліксіз көріну» – бұл:",
     "options": [
@@ -11,5 +10,4 @@ const questions = [
     "explanation": "Түсініктеме: ҚР ЖҚЕ 1-бөліміне сәйкес...",
     "image": "images/1.jpg" 
   }
-  // ⬇️ 剩下的 12 道题以及未来的 1000 道题，都按这种格式一条条在下面用逗号隔开追加
-];
+  ];
