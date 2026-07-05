@@ -1,239 +1,162 @@
-let allQuestions = [];
-let currentQuestionsList = [];
-let currentIndex = 0;
-let isExamMode = false;
-let examTimer = null;
-let timeLeft = 40 * 60; 
+// ==========================================
+// 💡 题目数据源（你可以在下面追加剩下的 12 道题）
+// ==========================================
+const questions = [
+  {
+    "question": "«Жеткіліксіз көріну» – бұл:",
+    "options": [
+      "Тұман, жаңбыр, шаң, қар жауыу және сол сияқты жағдайларда, сондай-ақ қара көлеңкеде жолдың 350 метрден кем көрінуі.",
+      "Тұман, жаңбыр, шаң, қар жауыу және сол сияқты жағдайларда, сондай-ақ қара көлеңкеде жолдың 400 метрден кем көрінуі.",
+      "Тұман, жаңбыр, шаң, қар жауыу және сол сияқты жағдайларда, сондай-ақ қара көлеңкеде жолдың 300 метрден кем көрінуі."
+    ],
+    "answer": 2, // 对应选项数组中的第3项（索引从0开始算）
+    "explanation": "Түсініктеме: ҚР ЖҚЕ 1-бөліміне сәйкес, «Жеткіліксіз көріну» — тұман, жаңбыр, шаң, қар жаууы және сол сияқты жағдайларда, сондай-ақ ымыртта (қара көлеңкеде) жолдың көрінуінің 300 метрден кем болуы.",
+    "image": "images/1.jpg" 
+  }
+  // ⬇️ 如果有第2题、第3题，按照上面一样的格式，在下方用逗号隔开依次粘贴即可
+  
+];
+
+// ==========================================
+// ⚙️ 核心业务逻辑控制代码
+// ==========================================
+let currentMode = ''; // 'practice' 还是 'exam'
+let currentQuestionIndex = 0;
 let score = 0;
 let hasAnswered = false;
 
-// 🔒 核心安全与付费配置（当前设置为全免费运行）
-const SECURITY_KEY = "avto2026"; // 你的解锁密码（后期收费时用）
-const FREE_LIMIT = 999999;       // 免费题数限制（设为999999相当于当前全免费）
-
-window.onload = async () => {
-    try {
-        const response = await fetch('questions.json');
-        allQuestions = await response.json();
-        updateMenuStats();
-    } catch (e) {
-        alert("Қателік: Тізім жүктелмеді.");
-    }
-};
-
-function updateMenuStats() {
-    if (allQuestions.length === 0) return;
-    let savedIndex = parseInt(localStorage.getItem('pdd_practice_index')) || 0;
-    if (savedIndex >= allQuestions.length) {
-        document.getElementById('practice-stats').innerText = `Ұттыңыз! Барлығын аяқтадыңыз!`;
-        return;
-    }
-    let leftQuestions = allQuestions.length - savedIndex;
-    document.getElementById('practice-stats').innerText = `Өтілгені: ${savedIndex} | Қалғаны: ${leftQuestions} | Барлығы: ${allQuestions.length}`;
-}
+// 页面加载完成后初始化状态
+document.addEventListener("DOMContentLoaded", () => {
+    updateStatsDisplay();
+});
 
 function startPractice() {
-    if(allQuestions.length === 0) return;
-    isExamMode = false;
+    currentMode = 'practice';
+    currentQuestionIndex = 0;
+    score = 0;
     document.getElementById('mode-selection').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
-    currentQuestionsList = [...allQuestions];
-    currentIndex = parseInt(localStorage.getItem('pdd_practice_index')) || 0;
+    document.getElementById('timer').classList.add('hidden');
     showQuestion();
 }
 
 function startExam() {
-    if(allQuestions.length === 0) return;
-    isExamMode = true;
+    currentMode = 'exam';
+    currentQuestionIndex = 0;
+    score = 0;
     document.getElementById('mode-selection').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
     document.getElementById('timer').classList.remove('hidden');
-    
-    // 随机抽取40道题
-    currentQuestionsList = [...allQuestions].sort(() => 0.5 - Math.random()).slice(0, 40);
-    currentIndex = 0;
-    score = 0;
-    timeLeft = 40 * 60;
-    
+    // 这里如果以后需要加倒计时，可以在此处扩展
     showQuestion();
-    
-    clearInterval(examTimer);
-    examTimer = setInterval(() => {
-        timeLeft--;
-        let mins = Math.floor(timeLeft / 60);
-        let secs = timeLeft % 60;
-        document.getElementById('timer').innerText = `Қалған уақыт: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        if (timeLeft <= 0) {
-            clearInterval(examTimer);
-            endQuiz();
-        }
-    }, 1000);
 }
 
+function backToHome() {
+    document.getElementById('quiz-area').classList.add('hidden');
+    document.getElementById('mode-selection').classList.remove('hidden');
+    updateStatsDisplay();
+}
+
+function updateStatsDisplay() {
+    const statsText = document.getElementById('practice-stats');
+    if (statsText) {
+        statsText.innerText = `Базада барлығы ${questions.length} сұрақ бар.`;
+    }
+}
+
+// 核心渲染函数：展示题目和处理图片显示
 function showQuestion() {
-    if (currentIndex >= currentQuestionsList.length) {
-        endQuiz();
-        return;
-    }
-
-    // 🛑 付费卡点拦截逻辑
-    if (!isExamMode && currentIndex >= FREE_LIMIT) {
-        let isUnlocked = localStorage.getItem('pdd_user_unlocked') === 'true';
-        if (!isUnlocked) {
-            lockScreenForPayment();
-            return;
-        }
-    }
-
     hasAnswered = false;
-    document.getElementById('feedback').innerText = "";
-    const currentQuestion = currentQuestionsList[currentIndex];
+    const q = questions[currentQuestionIndex];
     
-    // 渲染进度与题号
-    if (isExamMode) {
-        document.getElementById('progress').innerText = `Сұрақ: ${currentIndex + 1} / 40`;
-        document.getElementById('p-bar').style.width = `${((currentIndex) / 40) * 100}%`;
-    } else {
-        document.getElementById('progress').innerText = `Сұрақ: ${currentIndex + 1} / ${allQuestions.length}`;
-        document.getElementById('p-bar').style.width = `${((currentIndex) / allQuestions.length) * 100}%`;
-    }
+    // 1. 渲染题干
+    document.getElementById('question-text').innerText = q.question;
     
-    document.getElementById('question-text').innerText = currentQuestion.question;
-    
-    // 🎬 图片与视频媒体动态加载区
+    // 2. 💡 动态判断并渲染媒体（图片/视频）
     const mediaBlock = document.getElementById('media-block');
-    mediaBlock.innerHTML = ""; 
-    mediaBlock.style.display = "none"; 
-
-    if (currentQuestion.image) {
-        mediaBlock.innerHTML = `<img src="${currentQuestion.image}" alt="PDD Image">`;
-        mediaBlock.style.display = "block";
-    } else if (currentQuestion.video) {
-        mediaBlock.innerHTML = `
-            <video src="${currentQuestion.video}" controls autoplay loop muted playsinline></video>
-        `;
-        mediaBlock.style.display = "block";
-    }
-
-    // 📘 隐藏并清空上一题的解析框
-    const expBlock = document.getElementById('explanation-block');
-    if (expBlock) {
-        expBlock.style.display = "none";
-        document.getElementById('explanation-content').innerText = "";
+    if (q.image) {
+        // 判断是视频还是图片
+        if (q.image.endsWith('.mp4')) {
+            mediaBlock.innerHTML = `<video src="${q.image}" controls autoplay muted loop></video>`;
+        } else {
+            mediaBlock.innerHTML = `<img src="${q.image}" alt="ЖҚЕ сұрақ суреті">`;
+        }
+        mediaBlock.style.display = 'block';
+    } else {
+        mediaBlock.innerHTML = '';
+        mediaBlock.style.display = 'none';
     }
     
-    // 渲染选项
+    // 3. 隐藏上题的解析与反馈，隐藏下一题按钮
+    document.getElementById('explanation-block').style.display = 'none';
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('next-btn').classList.add('hidden');
+    
+    // 4. 渲染进度条与文字
+    const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+    document.getElementById('p-bar').style.width = `${progressPercent}%`;
+    document.getElementById('progress').innerText = `Сұрақ: ${currentQuestionIndex + 1} / ${questions.length}`;
+    
+    // 5. 渲染选项按钮
     const optionsContainer = document.getElementById('options-container');
-    optionsContainer.innerHTML = "";
-    currentQuestion.options.forEach((option, index) => {
+    optionsContainer.innerHTML = '';
+    
+    q.options.forEach((option, index) => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.innerText = option;
-        btn.onclick = () => checkAnswer(index, btn);
+        btn.onclick = () => selectOption(index, btn);
         optionsContainer.appendChild(btn);
     });
 }
 
-function checkAnswer(selectedIndex, clickedBtn) {
-    if (hasAnswered) return; 
+// 处理点击选项后的对错逻辑
+function selectOption(selectedIndex, clickedBtn) {
+    if (hasAnswered) return; // 防止重复点击
     hasAnswered = true;
     
-    const currentQuestion = currentQuestionsList[currentIndex];
-    const correctIndex = currentQuestion.answer;
+    const q = questions[currentQuestionIndex];
     const allButtons = document.querySelectorAll('.option-btn');
     
-    allButtons[correctIndex].classList.add('correct');
-
-    if (selectedIndex === correctIndex) {
+    if (selectedIndex === q.answer) {
+        clickedBtn.classList.add('correct');
+        document.getElementById('feedback').innerHTML = '<span style="color:#10b981;">✅ Дұрыс! (Правильно)</span>';
         score++;
-        document.getElementById('feedback').innerHTML = "<span style='color:#10b981;'>🟢 Дұрыс!</span>";
     } else {
         clickedBtn.classList.add('incorrect');
-        document.getElementById('feedback').innerHTML = "<span style='color:#ef4444;'>🔴 Бұрыс!</span>";
+        // 高亮标出正确答案
+        allButtons[q.answer].classList.add('correct');
+        document.getElementById('feedback').innerHTML = '<span style="color:#ef4444;">❌ Қате! (Неправильно)</span>';
     }
-
-    // 📘 核心更新：移除了 !isExamMode 限制，现在模拟考试点下选项后也会同步弹出 “Түсініктеме（解读）” 
-    const expBlock = document.getElementById('explanation-block');
-    if (currentQuestion.explanation && expBlock) {
-        document.getElementById('explanation-content').innerText = currentQuestion.explanation;
-        expBlock.style.display = "block"; 
+    
+    // 显示解析
+    if (q.explanation) {
+        document.getElementById('explanation-content').innerText = q.explanation;
+        document.getElementById('explanation-block').style.style = 'none'; // 确保显示
+        document.getElementById('explanation-block').style.display = 'block';
     }
-
-    if (!isExamMode) {
-        localStorage.setItem('pdd_practice_index', currentIndex + 1);
-        updateMenuStats();
-    }
+    
+    // 显示下一题按钮
+    document.getElementById('next-btn').classList.remove('hidden');
 }
 
 function nextQuestion() {
-    if (!hasAnswered) return;
-    currentIndex++;
-    showQuestion();
-}
-
-function endQuiz() {
-    clearInterval(examTimer);
-    document.getElementById('quiz-area').classList.add('hidden');
-    document.getElementById('mode-selection').classList.remove('hidden');
-    
-    if (isExamMode) {
-        alert(`Емтихан аяқталды!\nНәтижеңіз: 40-тан ${score} дұрыс.\n${score >= 32 ? '🎉 Құттықтаймыз! Емтиханнан өттіңіз!' : '❌ Өкінішке орай, емтиханнан өтпедіңіз.'}`);
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        showQuestion();
     } else {
-        alert("Жаттығу аяқталды!");
+        // 测试结束
+        document.getElementById('options-container').innerHTML = '';
+        document.getElementById('media-block').style.display = 'none';
+        document.getElementById('explanation-block').style.display = 'none';
+        document.getElementById('next-btn').classList.add('hidden');
+        document.getElementById('question-text').innerText = `Жаттығу аяқталды! 🎉\nСіздің нәтижеңіз: ${questions.length} сұрақтан ${score} дұрыс жауап.`;
+        document.getElementById('feedback').innerText = '';
     }
-    updateMenuStats();
 }
 
 function resetProgress() {
-    if (confirm("Прогресті нөлдегіңіз келеді ме?")) {
-        localStorage.removeItem('pdd_practice_index');
-        currentIndex = 0;
-        updateMenuStats();
-    }
-}
-
-// 🔒 渲染付费锁屏提示
-function lockScreenForPayment() {
-    const optionsContainer = document.getElementById('options-container');
-    document.getElementById('question-text').innerText = "🔒 Толық база жабық (Доступ ограничен)";
-    
-    optionsContainer.innerHTML = `
-        <div style="text-align: center; padding: 15px; background: #fff; border-radius: 8px;">
-            <p style="font-size: 12pt; font-weight: bold; color: #dc2626; margin-bottom: 10px;">
-                Пароль таратпаймыз ‼️ <br>
-                <span style="font-size: 10.5pt; font-weight: normal; color: #475569;">За распространение密码将导致封号!</span>
-            </p>
-            <p style="font-size: 10pt; color: #64748b; margin-bottom: 15px; line-height: 1.4;">
-                Тегін сұрақтар шегіне жеттіңіз. Барлық 1500+ сұрақты ашу және құпия сөзді сатып алу үшін жазыңыз: <br>
-                <strong style="color: #2563eb; font-size: 12pt;">@your_telegram_username</strong>
-            </p>
-            <input type="text" id="pass-input" placeholder="Парольді енгізіңіз" style="width: 80%; padding: 12px; font-size: 12pt; border: 2px solid #cbd5e1; border-radius: 6px; text-align: center; margin-bottom: 15px;">
-            <button class="menu-btn" onclick="verifyUserPassword()" style="background: #10b981; margin: 0 auto; width: 80%;">Кіру (Войти)</button>
-        </div>
-    `;
-    document.getElementById('feedback').innerText = "";
-}
-
-function verifyUserPassword() {
-    const input = document.getElementById('pass-input').value.trim();
-    if (input === SECURITY_KEY) {
-        localStorage.setItem('pdd_user_unlocked', 'true');
-        alert("🎉 Сәтті ашылды! (Доступ открыт!)");
-        showQuestion();
-    } else {
-        alert("❌ Қате пароль! (Неверный пароль!)");
-    }
-}
-
-// 🔙 完美关联顶部的 “Шығу” 退出回到首页功能
-function backToHome() {
-    if (isExamMode) {
-        if (!confirm("Емтиханды тоқтатып, шыққыңыз келеді ме?")) {
-            return; 
-        }
-    }
-    clearInterval(examTimer);
-    document.getElementById('quiz-area').classList.add('hidden');
-    document.getElementById('mode-selection').classList.remove('hidden');
-    updateMenuStats();
+    currentQuestionIndex = 0;
+    score = 0;
+    backToHome();
 }
