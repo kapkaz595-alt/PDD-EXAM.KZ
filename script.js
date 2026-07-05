@@ -152,9 +152,9 @@ function checkAnswer(selectedIndex, clickedBtn) {
         document.getElementById('feedback').innerHTML = "<span style='color:#ef4444;'>🔴 Бұрыс!</span>";
     }
 
-    // 📘 核心：如果在练习模式下，且当前题目有“Түсініктеме（解析）”，就自动弹出来
+    // 📘 核心更新：移除了 !isExamMode 限制，现在模拟考试点下选项后也会同步弹出 “Түсініктеме（解读）” 
     const expBlock = document.getElementById('explanation-block');
-    if (!isExamMode && currentQuestion.explanation && expBlock) {
+    if (currentQuestion.explanation && expBlock) {
         document.getElementById('explanation-content').innerText = currentQuestion.explanation;
         expBlock.style.display = "block"; 
     }
