@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ЖҚЕ Жаттықтырушы 2026</title>
     
-    <!-- 🔗 这一行就是桥梁，它把刚才那个 style.css 文件连接到这个 HTML 里 -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- 🌓 模式切换栏 -->
     <div class="top-bar">
         <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 Түнгі режим</button>
     </div>
@@ -23,7 +21,6 @@
         
         <button class="menu-btn" onclick="startExam()">⏱ Емтихан (40 сұрақ)</button>
         
-        <!-- ❌ 错题本功能按钮 -->
         <button id="wrong-questions-btn" class="menu-btn wrong-btn" onclick="startWrongPractice()" disabled>
             ❌ Қателермен жұмыс (<span id="wrong-count">0</span>)
         </button>
@@ -55,7 +52,6 @@
         <div class="card">
             <p id="question-text">Жүктелуде...</p>
             
-            <!-- 💡 媒体展示区域 -->
             <div id="media-block" class="media-container"></div>
             
             <div id="options-container"></div>
