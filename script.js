@@ -1,5 +1,5 @@
 // ==========================================
-// ⚙️ Логикалық бақылау және прогресті сақтау коды
+// ⚙️ Логикалық бақылау және прогресті сақтау коды (Жаңартылған)
 // ==========================================
 let allQuestions = [];       
 let currentQuestions = [];   
@@ -10,7 +10,6 @@ let hasAnswered = false;
 let wrongQuestionIds = [];   
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Түнгі режимді тексеру
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const themeBtn = document.getElementById('theme-btn');
@@ -18,26 +17,17 @@ document.addEventListener("DOMContentLoaded", () => {
         themeBtn.innerText = savedTheme === 'dark' ? '☀️ Күндізгі режим' : '🌙 Түнгі режим';
     }
 
-    // Қате сұрақтарды жүктеу
     const savedWrongs = localStorage.getItem('pdd_wrong_questions');
-    if (savedWrongs) {
-        wrongQuestionIds = JSON.parse(savedWrongs);
-    }
+    if (savedWrongs) wrongQuestionIds = JSON.parse(savedWrongs);
 
-    // Сұрақтарды JSON файлынан жүктеу
     fetch('questions.json')
-        .then(response => {
-            if (!response.ok) throw new Error('Сұрақтар файлын жүктеу мүмкін болмады');
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             allQuestions = data; 
             updateStatsDisplay();
             checkAndRestoreProgress();
         })
-        .catch(error => {
-            console.error('Қателік орын алды:', error);
-        });
+        .catch(error => console.error('Қателік орын алды:', error));
 });
 
 function toggleTheme() {
@@ -50,10 +40,7 @@ function toggleTheme() {
 
 function updateStatsDisplay() {
     const statsText = document.getElementById('practice-stats');
-    if (statsText) {
-        statsText.innerText = `Базада барлығы ${allQuestions.length} сұрақ бар.`;
-    }
-
+    if (statsText) statsText.innerText = `Базада барлығы ${allQuestions.length} сұрақ бар.`;
     const wrongCountSpan = document.getElementById('wrong-count');
     const wrongBtn = document.getElementById('wrong-questions-btn');
     if (wrongCountSpan && wrongBtn) {
@@ -62,37 +49,32 @@ function updateStatsDisplay() {
     }
 }
 
-// Жаттығу режимін бастау
 function startPractice() {
     if (allQuestions.length === 0) return;
     currentMode = 'practice';
     currentQuestions = [...allQuestions];
-    saveCurrentStateToLocal();
+    currentQuestionIndex = parseInt(localStorage.getItem('pdd_practice_index') || '0', 10);
     initQuiz();
 }
 
-// Емтихан режимін бастау: Ескі прогресті тазалап, жаңадан бастау
 function startExam() {
     if (allQuestions.length === 0) return;
-    clearSavedProgress(); 
-    
     currentMode = 'exam';
+    // Емтиханды әрқашан нөлден бастаймыз
     let shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
     currentQuestions = shuffled.slice(0, Math.min(40, allQuestions.length));
-    
-    localStorage.setItem('pdd_exam_questions', JSON.stringify(currentQuestions));
-    localStorage.setItem('pdd_current_mode', 'exam');
+    currentQuestionIndex = 0;
+    score = 0;
     
     document.getElementById('timer').classList.remove('hidden');
     initQuiz();
 }
 
-// Қателермен жұмыс режимін бастау
 function startWrongPractice() {
     if (wrongQuestionIds.length === 0) return;
     currentMode = 'wrong';
     currentQuestions = wrongQuestionIds.map(idx => allQuestions[idx]).filter(q => q !== undefined);
-    saveCurrentStateToLocal();
+    currentQuestionIndex = 0;
     initQuiz();
 }
 
@@ -103,40 +85,31 @@ function initQuiz() {
     showQuestion();
 }
 
-// Прогресті қалпына келтіру: Емтихан режимінде автоматты қалпына келтіруді өшіру
-function checkAndRestoreProgress() {
-    const savedMode = localStorage.getItem('pdd_current_mode');
-    // Егер емтихан режимі болса, автоматты қалпына келтірмейміз, жаңасын бастау керек
-    if (!savedMode || savedMode === 'exam') return; 
-
-    currentMode = savedMode;
-    currentQuestionIndex = parseInt(localStorage.getItem('pdd_current_index') || '0', 10);
-    score = parseInt(localStorage.getItem('pdd_current_score') || '0', 10);
-
+// Режимге байланысты прогресті бөлек сақтау
+function saveCurrentStateToLocal() {
+    localStorage.setItem('pdd_current_mode', currentMode);
+    localStorage.setItem('pdd_current_score', score);
+    
     if (currentMode === 'practice') {
-        currentQuestions = [...allQuestions];
-    } else if (currentMode === 'wrong') {
-        currentQuestions = wrongQuestionIds.map(idx => allQuestions[idx]).filter(q => q !== undefined);
-    }
-
-    if (currentQuestionIndex < currentQuestions.length) {
-        initQuiz();
-    } else {
-        clearSavedProgress();
+        localStorage.setItem('pdd_practice_index', currentQuestionIndex);
     }
 }
 
-function saveCurrentStateToLocal() {
-    localStorage.setItem('pdd_current_mode', currentMode);
-    localStorage.setItem('pdd_current_index', currentQuestionIndex);
-    localStorage.setItem('pdd_current_score', score);
+function checkAndRestoreProgress() {
+    const savedMode = localStorage.getItem('pdd_current_mode');
+    if (savedMode === 'practice') {
+        currentMode = 'practice';
+        currentQuestions = [...allQuestions];
+        currentQuestionIndex = parseInt(localStorage.getItem('pdd_practice_index') || '0', 10);
+        score = parseInt(localStorage.getItem('pdd_current_score') || '0', 10);
+        if (currentQuestionIndex > 0) initQuiz();
+    }
 }
 
 function clearSavedProgress() {
     localStorage.removeItem('pdd_current_mode');
-    localStorage.removeItem('pdd_current_index');
+    localStorage.removeItem('pdd_practice_index');
     localStorage.removeItem('pdd_current_score');
-    localStorage.removeItem('pdd_exam_questions');
     currentQuestionIndex = 0;
     score = 0;
     currentMode = '';
@@ -146,22 +119,15 @@ function showQuestion() {
     hasAnswered = false;
     const q = currentQuestions[currentQuestionIndex];
     document.getElementById('question-text').innerText = q.question;
-    
     const mediaBlock = document.getElementById('media-block');
-    if (q.image) {
-        mediaBlock.innerHTML = q.image.endsWith('.mp4') ? `<video src="${q.image}" controls autoplay muted loop></video>` : `<img src="${q.image}">`;
-        mediaBlock.style.display = 'block';
-    } else {
-        mediaBlock.style.display = 'none';
-    }
-    
+    mediaBlock.innerHTML = q.image ? (q.image.endsWith('.mp4') ? `<video src="${q.image}" controls autoplay muted loop></video>` : `<img src="${q.image}">`) : '';
+    mediaBlock.style.display = q.image ? 'block' : 'none';
     document.getElementById('explanation-block').style.display = 'none';
     document.getElementById('next-btn').classList.add('hidden');
     
     const currentNum = currentQuestionIndex + 1;
-    const totalNum = currentQuestions.length;
-    document.getElementById('p-bar').style.width = `${(currentNum / totalNum) * 100}%`;
-    document.getElementById('progress').innerHTML = `Сұрақ: ${currentNum} / ${totalNum}`;
+    document.getElementById('p-bar').style.width = `${(currentNum / currentQuestions.length) * 100}%`;
+    document.getElementById('progress').innerHTML = `Сұрақ: ${currentNum} / ${currentQuestions.length}`;
     
     const optionsContainer = document.getElementById('options-container');
     optionsContainer.innerHTML = '';
@@ -181,7 +147,6 @@ function selectOption(selectedIndex, clickedBtn) {
     if (selectedIndex === q.answer) {
         clickedBtn.classList.add('correct');
         score++;
-        localStorage.setItem('pdd_current_score', score);
     } else {
         clickedBtn.classList.add('incorrect');
         document.querySelectorAll('.option-btn')[q.answer].classList.add('correct');
@@ -191,16 +156,17 @@ function selectOption(selectedIndex, clickedBtn) {
         document.getElementById('explanation-block').style.display = 'block';
     }
     document.getElementById('next-btn').classList.remove('hidden');
+    saveCurrentStateToLocal();
 }
 
 function nextQuestion() {
     currentQuestionIndex++;
-    saveCurrentStateToLocal();
     if (currentQuestionIndex < currentQuestions.length) {
         showQuestion();
+        saveCurrentStateToLocal();
     } else {
         clearSavedProgress();
-        alert(`Сынақ аяқталды! Сіздің нәтижеңіз: ${score} / ${currentQuestions.length}`);
+        alert(`Сынақ аяқталды! Нәтижеңіз: ${score}`);
         backToHome();
     }
 }
@@ -214,9 +180,7 @@ function backToHome() {
 
 function resetProgress() {
     if (confirm("Прогресті толығымен өшіргіңіз келе ме?")) {
-        wrongQuestionIds = [];
-        localStorage.removeItem('pdd_wrong_questions');
-        clearSavedProgress();
-        backToHome();
+        localStorage.clear();
+        location.reload();
     }
 }
