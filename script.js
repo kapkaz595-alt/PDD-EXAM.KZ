@@ -1,17 +1,17 @@
 // ==========================================
-// ⚙️ 核心业务逻辑控制代码（支持错题本与夜间模式）
+// ⚙️ Кері байланыс және логикалық бақылау коды
 // ==========================================
-let allQuestions = [];       // 动态存储从 JSON 读取到的所有题目
-let currentQuestions = [];   // 当前正在测试的题目集合（全套题目、或错题集）
-let currentMode = '';        // 'practice' (练习), 'exam' (考试), 'wrong' (错题本)
+let allQuestions = [];       // JSON-дан жүктелген барлық сұрақтар
+let currentQuestions = [];   // Ағымдағы тест сұрақтарының жиынтығы
+let currentMode = '';        // 'practice' (жаттығу), 'exam' (емтихан), 'wrong' (қателермен жұмыс)
 let currentQuestionIndex = 0;
 let score = 0;
 let hasAnswered = false;
-let wrongQuestionIds = [];   // 存储错题的索引编号（保存到本地）
+let wrongQuestionIds = [];   // Қате сұрақтардың ID жиынтығы (localStorage-да сақталады)
 
-// 1. 页面加载完成后自动初始化
+// 1. Бет толық жүктелгеннен кейін іске қосылатын функция
 document.addEventListener("DOMContentLoaded", () => {
-    // 🌓 恢复之前保存的夜间模式设置
+    // 🌓 Түнгі режимнің баптауларын тексеру
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const themeBtn = document.getElementById('theme-btn');
@@ -19,13 +19,13 @@ document.addEventListener("DOMContentLoaded", () => {
         themeBtn.innerText = savedTheme === 'dark' ? '☀️ Күндізгі режим' : '🌙 Түнгі режим';
     }
 
-    // ❌ 读取本地保存的错题本数据
+    // ❌ Сақталған қате сұрақтарды жүктеу
     const savedWrongs = localStorage.getItem('pdd_wrong_questions');
     if (savedWrongs) {
         wrongQuestionIds = JSON.parse(savedWrongs);
     }
 
-    // 📥 异步加载题目 JSON 文件
+    // 📥 JSON-нан сұрақтарды жүктеу
     fetch('questions.json')
         .then(response => {
             if (!response.ok) throw new Error('Сұрақтар файлын жүктеу мүмкін болмады');
@@ -33,59 +33,58 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(data => {
             allQuestions = data; 
-            updateStatsDisplay(); // 更新主页各种数据状态
+            updateStatsDisplay(); // Негізгі беттің статистикасын жаңарту
         })
         .catch(error => {
-            console.error('加载题目失败:', error);
+            console.error('Сұрақтарды жүктеу қатесі:', error);
             const statsText = document.getElementById('practice-stats');
-            if (statsText) statsText.innerText = 'Сұрақтарды жүктеу қатесі (加载题目失败)';
+            if (statsText) statsText.innerText = 'Сұрақтарды жүктеу қатесі';
         });
 });
 
-// 2. 🌓 昼夜模式切换函数
+// 2. 🌓 Түнгі және күндізгі режимді ауыстыру функциясы
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     
     document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme); // 保存用户选择
+    localStorage.setItem('theme', newTheme); // Пайдаланушы таңдауын сақтау
     
-    document.getElementById('theme-btn').innerText = newTheme === 'dark' ? '☀️ Күндізгі режим' : '🌙 Түнгі regime';
+    document.getElementById('theme-btn').innerText = newTheme === 'dark' ? '☀️ Күндізгі dynamic' : '🌙 Түнгі режим';
+    // Ескерту: Жоғарыдағы Түнгі режим мәтіні толық түзетілді
+    document.getElementById('theme-btn').innerText = newTheme === 'dark' ? '☀️ Күндізгі режим' : '🌙 Түнгі regime'.replace('regime', 'режим');
 }
 
-// 3. 📊 更新主界面统计状态（总题数、错题数）
+// 3. 📊 Статистиканы жаңарту (Базадағы сұрақтар мен қателер саны)
 function updateStatsDisplay() {
-    // 更新总题数
     const statsText = document.getElementById('practice-stats');
     if (statsText) {
         statsText.innerText = `Базада барлығы ${allQuestions.length} сұрақ бар.`;
     }
 
-    // 更新错题本数量与按钮状态
     const wrongCountSpan = document.getElementById('wrong-count');
     const wrongBtn = document.getElementById('wrong-questions-btn');
     if (wrongCountSpan && wrongBtn) {
         wrongCountSpan.innerText = wrongQuestionIds.length;
         if (wrongQuestionIds.length > 0) {
-            wrongBtn.disabled = false; // 有错题时激活按钮
+            wrongBtn.disabled = false;
         } else {
-            wrongBtn.disabled = true;  // 没错题时禁用
+            wrongBtn.disabled = true;
         }
     }
 }
 
-// 4. 🔄 启动不同的模式
+// 4. 🔄 Режимдерді іске қосу
 function startPractice() {
     if (allQuestions.length === 0) return;
     currentMode = 'practice';
-    currentQuestions = [...allQuestions]; // 复制一份全量题库
+    currentQuestions = [...allQuestions];
     initQuiz();
 }
 
 function startExam() {
     if (allQuestions.length === 0) return;
     currentMode = 'exam';
-    // 模拟真实考试：从总题库随机抽 40 题（若不够40题则全抽）
     let shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
     currentQuestions = shuffled.slice(0, Math.min(40, allQuestions.length));
     
@@ -96,7 +95,6 @@ function startExam() {
 function startWrongPractice() {
     if (wrongQuestionIds.length === 0) return;
     currentMode = 'wrong';
-    // 根据错题本保存的索引，把对应的题目过滤出来
     currentQuestions = wrongQuestionIds.map(idx => allQuestions[idx]).filter(q => q !== undefined);
     
     if (currentQuestions.length === 0) {
@@ -108,7 +106,7 @@ function startWrongPractice() {
     initQuiz();
 }
 
-// 核心初始化
+// Тестті бастау
 function initQuiz() {
     currentQuestionIndex = 0;
     score = 0;
@@ -117,15 +115,13 @@ function initQuiz() {
     showQuestion();
 }
 
-// 5. 📝 渲染当前题目
+// 5. 📝 Сұрақты көрсету және Прогресс-бар есептеу
 function showQuestion() {
     hasAnswered = false;
     const q = currentQuestions[currentQuestionIndex];
     
-    // 渲染题干
     document.getElementById('question-text').innerText = q.question;
     
-    // 渲染媒体组件（图片/视频）
     const mediaBlock = document.getElementById('media-block');
     if (q.image) {
         if (q.image.endsWith('.mp4')) {
@@ -139,17 +135,22 @@ function showQuestion() {
         mediaBlock.style.display = 'none';
     }
     
-    // 复位组件状态
     document.getElementById('explanation-block').style.display = 'none';
     document.getElementById('feedback').innerText = '';
     document.getElementById('next-btn').classList.add('hidden');
     
-    // 计算并更新进度条
-    const progressPercent = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+    // 📈 ------------------- ПРОГРЕСС-БАР ЖӘНЕ СҰРАҚТАР САНЫН ЕСЕПТЕУ -------------------
+    const currentNum = currentQuestionIndex + 1; // Ағымдағы сұрақ нөмірі
+    const totalNum = currentQuestions.length;    // Жалпы сұрақ саны
+    const remainingNum = totalNum - currentNum;  // Қалған сұрақтар саны
+
+    const progressPercent = (currentNum / totalNum) * 100;
     document.getElementById('p-bar').style.width = `${progressPercent}%`;
-    document.getElementById('progress').innerText = `Сұрақ: ${currentQuestionIndex + 1} / ${currentQuestions.length}`;
     
-    // 生成选项按钮
+    // Мәтінді жаңарту: "Сұрақ: 1 / 3 (Қалды: 2)" форматында шығады
+    document.getElementById('progress').innerHTML = `Сұрақ: ${currentNum} / ${totalNum} <span style="font-size: 0.9em; color: #718096; margin-left: 8px;">(Қалды: ${remainingNum})</span>`;
+    // ----------------------------------------------------------------------------------
+    
     const optionsContainer = document.getElementById('options-container');
     optionsContainer.innerHTML = '';
     
@@ -162,15 +163,13 @@ function showQuestion() {
     });
 }
 
-// 6. 👆 用户点击选项判断
+// 6. 👆 Жауапты таңдау және тексеру
 function selectOption(selectedIndex, clickedBtn) {
     if (hasAnswered) return;
     hasAnswered = true;
     
     const q = currentQuestions[currentQuestionIndex];
     const allButtons = document.querySelectorAll('.option-btn');
-    
-    // 寻找到当前题目在原始总题库 allQuestions 中的真实索引值
     const originalIndex = allQuestions.findIndex(item => item.question === q.question);
 
     if (selectedIndex === q.answer) {
@@ -178,7 +177,6 @@ function selectOption(selectedIndex, clickedBtn) {
         document.getElementById('feedback').innerHTML = '<span style="color:#10b981;">✅ Дұрыс!</span>';
         score++;
 
-        // 💡 如果在“错题本模式”下答对了，则将它从错题本中移除
         if (currentMode === 'wrong' && originalIndex !== -1) {
             wrongQuestionIds = wrongQuestionIds.filter(id => id !== originalIndex);
             localStorage.setItem('pdd_wrong_questions', JSON.stringify(wrongQuestionIds));
@@ -188,14 +186,12 @@ function selectOption(selectedIndex, clickedBtn) {
         allButtons[q.answer].classList.add('correct');
         document.getElementById('feedback').innerHTML = '<span style="color:#ef4444;">❌ Қате!</span>';
         
-        // 💡 只要答错了，就加入错题本（避免重复加入）
         if (originalIndex !== -1 && !wrongQuestionIds.includes(originalIndex)) {
             wrongQuestionIds.push(originalIndex);
             localStorage.setItem('pdd_wrong_questions', JSON.stringify(wrongQuestionIds));
         }
     }
     
-    // 显示解析蓝框
     if (q.explanation) {
         document.getElementById('explanation-content').innerText = q.explanation;
         document.getElementById('explanation-block').style.display = 'block';
@@ -204,13 +200,12 @@ function selectOption(selectedIndex, clickedBtn) {
     document.getElementById('next-btn').classList.remove('hidden');
 }
 
-// 7. ➡️ 下一题或结束结算
+// 7. ➡️ Келесі сұраққа өту немесе нәтижені көрсету
 function nextQuestion() {
     currentQuestionIndex++;
     if (currentQuestionIndex < currentQuestions.length) {
         showQuestion();
     } else {
-        // 完成答题后的结算界面展现
         document.getElementById('options-container').innerHTML = '';
         document.getElementById('media-block').style.display = 'none';
         document.getElementById('explanation-block').style.display = 'none';
@@ -226,7 +221,7 @@ function nextQuestion() {
     }
 }
 
-// 8. ⬅ 返回主页
+// 8. ⬅ Басты бетке қайту
 function backToHome() {
     document.getElementById('quiz-area').classList.add('hidden');
     document.getElementById('timer').classList.add('hidden');
@@ -234,7 +229,7 @@ function backToHome() {
     updateStatsDisplay();
 }
 
-// 9. 🔄 重置数据
+// 9. 🔄 Прогресті өшіру (Нөлдеу)
 function resetProgress() {
     if (confirm("Прогресті нөлдегіңіз келе ме? (Жиналған барлық қателер өшіріледі)")) {
         wrongQuestionIds = [];
