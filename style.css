@@ -1,4 +1,4 @@
-/* 🎨 定义白天和夜间模式变量 */
+/* 🎨 Күндізгі және түнгі режим айнымалылары */
 :root {
     --bg-body: #f0f4f8;
     --bg-card: #ffffff;
@@ -12,7 +12,7 @@
     --explain-bg: #f8fafc;
 }
 
-/* 🌙 夜间模式颜色 */
+/* 🌙 Түнгі режим түстері */
 [data-theme="dark"] {
     --bg-body: #0f172a !important;
     --bg-card: #1e293b !important;
@@ -26,7 +26,7 @@
     --explain-bg: #1e293b !important;
 }
 
-/* ✨ 全局加上背景过渡，防止切模式时刺眼闪烁 */
+/* ✨ Режим ауысқанда көзді ауыртпау үшін бірқалыпты өту эффектісі */
 *, *::before, *::after { 
     box-sizing: border-box; 
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; 
@@ -41,7 +41,7 @@ body {
     color: var(--text-main); 
 }
 
-/* 顶部工具栏 */
+/* Жоғарғы құралдар панелі */
 .top-bar { display: flex; justify-content: flex-end; padding: 5px 0; margin-bottom: 10px; }
 .theme-toggle { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 10.5pt; font-weight: 500; }
 
@@ -49,7 +49,7 @@ h1 { text-align: center; color: var(--text-title); font-size: 20pt; margin-botto
 .menu-btn { display: block; width: 100%; padding: 15px; font-size: 13pt; font-weight: bold; cursor: pointer; margin-bottom: 12px; border: none; border-radius: 8px; background: var(--btn-bg); color: white; text-align: center; }
 .menu-btn:hover { background: var(--btn-hover); }
 
-/* 错题本特有按钮颜色 */
+/* Қателермен жұмыс батырмасының түсі */
 .wrong-btn { background: #ef4444; }
 .wrong-btn:hover { background: #dc2626; }
 .wrong-btn:disabled { background: var(--border-color); cursor: not-allowed; opacity: 0.6; color: var(--text-muted); }
@@ -59,7 +59,7 @@ h1 { text-align: center; color: var(--text-title); font-size: 20pt; margin-botto
 .option-btn { display: block; width: 100%; text-align: left; padding: 14px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-card); color: var(--text-main); cursor: pointer; font-size: 11pt; line-height: 1.3; }
 .option-btn:hover { background: var(--option-hover); }
 
-/* 答题正确/错误高亮（夜间模式加了 !important 保证着色） */
+/* Дұрыс және қате жауаптарды белгілеу */
 .correct { background: #d1fae5 !important; border-color: #10b981 !important; color: #065f46 !important; font-weight: bold; }
 .incorrect { background: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
 
@@ -73,19 +73,23 @@ h1 { text-align: center; color: var(--text-title); font-size: 20pt; margin-botto
 .exit-link { background: none; border: none; color: var(--text-muted); font-size: 11.5pt; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 5px; text-decoration: none; }
 .exit-link:hover { color: var(--text-title); }
 
+/* Медиа файлдар (Сурет/Видео) контейнері */
 .media-container { width: 100%; text-align: center; margin: 15px 0; display: none; }
 .media-container img, .media-container video { max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
+/* Түсініктеме блогы */
 .explanation-box { background: var(--explain-bg); border-left: 4px solid #2563eb; padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; display: none; animation: fadeIn 0.3s ease; }
 .explanation-title { font-weight: bold; color: var(--text-title); margin-bottom: 5px; font-size: 11.5pt; display: flex; align-items: center; gap: 6px; }
 .explanation-text { font-size: 11pt; color: var(--text-muted); line-height: 1.5; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-.progress-container { width: 100%; background-color: var(--border-color); border-radius: 4px; height: 8px; margin-bottom: 15px; overflow: hidden; }
-.progress-bar { height: 100%; background-color: #10b981; width: 0%; }
+/* Прогресс-бар индикаторы */
+.progress-container { width: 100%; background-color: var(--border-color); border-radius: 8px; height: 10px; margin-bottom: 15px; overflow: hidden; }
+.progress-bar { height: 100%; background-color: #10b981; width: 0%; transition: width 0.3s ease; border-radius: 8px; }
 .stats-text { text-align: center; font-size: 10.5pt; color: var(--text-muted); margin-top: -5px; margin-bottom: 15px; font-weight: 500; }
 .reset-link { text-align: center; display: block; margin-top: 20px; color: #94a3b8; font-size: 10pt; text-decoration: none; cursor: pointer; }
 
+/* Көрушілер есептегіші */
 .counter-box { text-align: center; margin-top: 40px; margin-bottom: 10px; padding: 15px; background: var(--bg-card); border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
 .counter-title { font-size: 10pt; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
